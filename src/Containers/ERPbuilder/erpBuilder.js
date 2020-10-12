@@ -2,7 +2,7 @@ import React,{Component} from 'react'
 import Aux from '../../Components/HigherOrderComp/Auxilary'
 import StudentLogin from '../../Components/StudentLogin/StudentLogin'
 import TeacherLogin from '../../Components/TeacherLogin/TeacherLogin'
-import {Route,Switch}from 'react-router-dom'
+import {Route,Switch,withRouter}from 'react-router-dom'
 import StudentPage from '../../Components/StudentPage/StudentPage'
 import TeacherPage from '../../Components/TeacherPage/TeacherPage'
 import Axios from 'axios';
@@ -13,23 +13,18 @@ import TeacherAttendanceUpload from '../../Components/TeacherAttendanceUpload/Te
 import StudentMessageBox from '../../Components/MessageBox/StudentMessageBox'
 import TeacherMessageBox from '../../Components/MessageBox/TeacherMessageBox'
 import {connect} from 'react-redux';
-import {Table} from 'semantic-ui-react';
+import TeacherHomepageAbout from '../../Components/TeacherPage/TeacherHomepageAbout'
+import StudentHomepageAbout from '../../Components/StudentPage/StudentHomepageAbout';
+import classes from './handlingTeacherStudentData.css'
+import Hey from './hey'
+import {Table,Menu,Segment,Input,Grid} from 'semantic-ui-react';
 
 
  var marksList = [];
 class ErpBuilder extends Component {
     
     state = {
-        Teacher: {
-            roll : '',
-            password: ''
-        },
-
-        Student :{
-            roll: '',
-            password : ''
-        },
-       
+        
         TeacherClassroom :{
               branch : '',
               semester : undefined,
@@ -41,82 +36,17 @@ class ErpBuilder extends Component {
         ],
 
         classroomMarksTableState: [],
-        classroomAttendanceTableState : []
+        classroomAttendanceTableState : [],
 
     }
+
 
     componentWillMount(){
         console.log('hey from erp builder');
+      
+
     }
    
-    OnChangeStudentRollNoHandler = (event) =>
-    {
-       this.setState({
-            Student :{
-               ...this.state.Student,
-                 roll: event.target.value
-            }
-       })
-    }
-
-    OnChangeStudentPasswordHandler = (event) => {
-        
-        this.setState({
-             Student: {
-                 ...this.state.Student,
-                  password: event.target.value
-             }
-           
-        })
-    }
-
-    OnStudentLoginSubmit = () => {
-
-
-        Axios.post('http://localhost:8080/feed/loginStudent',{
-            roll: this.state.Student.roll
-        })
-        .then(res => {
-                if (res.status !== 201)
-                    throw new Error('Failed to fetch Student Data!');
-
-                return res.data;
-        })
-        .then(resData => {
-             
-            console.log(resData);
-            const tokenInfo = {
-                isAuth: true,
-                token: resData.token,
-                userId: resData.post._id
-            }
-            this.props.SetTokenInfo(tokenInfo);
-
-             localStorage.setItem('token', resData.token);
-             localStorage.setItem('userId', resData.post._id);
-             const remainingMilliseconds = 60 * 60 * 1000;
-             const expiryDate = new Date(
-                 new Date().getTime() + remainingMilliseconds
-             );
-             localStorage.setItem('expiryDate', expiryDate.toISOString());
-          //   this.setAutoLogout(remainingMilliseconds);
-            setTimeout(() => {
-                 localStorage.removeItem('token');
-                 localStorage.removeItem('expiryDate');
-                 localStorage.removeItem('userId');
-            }, remainingMilliseconds);
-
-            this.props.SetStudentInfo(resData.post); 
-
-            console.log(this.props.studentInfo);
-            
-        })
-        .catch(err => {
-            console.log(err);
-        }) 
-         
-    }
-
     
     StudentMarks = () =>{
    
@@ -150,30 +80,6 @@ class ErpBuilder extends Component {
               return items;
       }
 
-
-
-    OnChangeTeacherRollNoHandler = (event) => {
-        
-        //console.log(event.target.id);
-        this.setState({
-              Teacher: {
-                  ...this.state.Teacher,
-                     roll: event.target.value
-              }
-            
-        })
-    }
-
-    OnChangeTeacherPasswordHandler = (event) => {
-        
-        this.setState({
-              Teacher : {
-                  ...this.state.Teacher,
-                   password: event.target.value
-              }
-        })
-    }
-
     OnChangeClassroomMarksHandler = (event) => {
             
             let arr = [...this.state.classroomMarksTableState];
@@ -206,49 +112,7 @@ class ErpBuilder extends Component {
       }
 
 
-     OnTeacherLoginSubmit = () => {
-
-         Axios.post('http://localhost:8080/feed/checkTeacher', {
-             roll : this.state.Teacher.roll
-             // send password also for authentication;
-         })
-         .then(res => {
-             if(res.status ===200 )   
-            throw new Error('Invalid Teacher Credentials');
-
-             return res.data;
-         })
-         .then(resData => {
-             
-              const tokenInfo = {
-                  isAuth: true,
-                  token: resData.token,
-                  userId: resData.post._id
-              }
-              this.props.SetTokenInfo(tokenInfo);
-
-              localStorage.setItem('token', resData.token);
-              localStorage.setItem('userId', resData.post._id);
-              const remainingMilliseconds = 60 * 60 * 1000;
-              const expiryDate = new Date(
-                  new Date().getTime() + remainingMilliseconds
-              );
-              localStorage.setItem('expiryDate', expiryDate.toISOString());
-              //   this.setAutoLogout(remainingMilliseconds);
-              setTimeout(() => {
-                  localStorage.removeItem('token');
-                  localStorage.removeItem('expiryDate');
-                  localStorage.removeItem('userId');
-              }, remainingMilliseconds);
-
-
-             this.props.SetTeacherInfo(resData.post);
-             console.log(this.props.teacherInfo);
-         })
-         .catch(err => console.log(err));
-
-         
-    }
+   
 
      TeachergetStudentsListForMarks = () =>{
          Axios.post('http://localhost:8080/feed/getStudentsListFromClassroom',{
@@ -372,26 +236,29 @@ class ErpBuilder extends Component {
      
     render(){
         
-         return (
         
-         
+         return (
           <Aux >
-          
-          <Route path = "/" exact render = { (Routprops) => <StudentLogin {...Routprops}  InputStudent ={this.state.Student}  handleRollNo = {this.OnChangeStudentRollNoHandler} handlePassword = {this.OnChangeStudentPasswordHandler} LoginSubmit = {this.OnStudentLoginSubmit}/>}/>
-          <Route path = "/" exact render = { (Routprops) => <TeacherLogin {...Routprops}  InputTeacher ={this.state.Teacher} handleRollNo = {this.OnChangeTeacherRollNoHandler} handlePassword = {this.OnChangeTeacherPasswordHandler} LoginSubmit = {this.OnTeacherLoginSubmit} />}/>
-          <Switch>
-             <Route path = "/StudentPage/:roll" exact render = {(Routprops) => <StudentPage {...Routprops} StudentInfo ={this.props.studentInfo} StudentMarks = {this.StudentMarks} StudentAttendance = {this.StudentAttendance}/>} />
-             <Route path = "/TeacherPage/:roll" exact render = {(Routprops) => <TeacherPage {...Routprops} TeacherInfo ={this.props.teacherInfo}/>} /> 
-             <Route path = {'/StudentPage/:roll/StudentMarks'} exact  render = { (Routprops) => <StudentMarks {...Routprops} getStudentMarks = {this.getStudentMarks}/>}/>
-             <Route path = {'/StudentPage/:roll/StudentAttendance'} exact render = { (Routprops) => <StudentAttendance {...Routprops} />}/>
-              <Route path = {'/StudentPage/:roll/StudentMessageBox'} render = { (Routprops) => <StudentMessageBox {...Routprops} />}/>
-              <Route path = {'/TeacherPage/:roll/TeacherMessageBox'} render = { (Routprops) => <TeacherMessageBox {...Routprops} />}/>
-             <Route path = {'/TeacherPage/:roll/TeacherMarksUpload'} exact render = { (Routprops) => <TeacherMarksUplaod {...Routprops} TeachergetStudentsListForMarks = {this.TeachergetStudentsListForMarks}  InputTeacherClassroom = {this.state.TeacherClassroom} handleChange = {this.OnChangeClassroomMarksHandler} handleTeacherData = {this.OnChangeClassroomHandler} classroomMarksTableState ={this.state.classroomMarksTableState} UpdateClassroomTable = {this.UpdateClassroomTable}/>}/>
-             <Route path = {'/TeacherPage/:roll/TeacherAttendanceUpload'} exact  render = { (Routprops) => <TeacherAttendanceUpload {...Routprops} TeachergetStudentsListForAttendance = {this.TeachergetStudentsListForAttendance}  InputTeacherClassroom ={this.state.TeacherClassroom} handleChange = {this.OnChangeClassroomAttendanceHandler} handleTeacherData = {this.OnChangeClassroomHandler} classroomAttendanceTableState ={this.state.classroomAttendanceTableState} UpdateClassroomTable = {this.UpdateClassroomTableAboutAttendance}/>}/>
-          </Switch>
-           
+          <Route path = "/StudentPage/:roll"  render = {(Routprops) => <StudentPage {...Routprops} StudentInfo ={this.props.studentInfo} StudentMarks = {this.StudentMarks} StudentAttendance = {this.StudentAttendance} getStudentMarks = {this.getStudentMarks}/>} />
+          <Route path = "/TeacherPage/:roll"  render = {(Routprops) => <TeacherPage {...Routprops} TeacherInfo ={this.props.teacherInfo}/>} /> 
+          <main className = {classes.teacherData}>
+             <Route path = {'/TeacherPage/:roll'} exact render = { (Routprops) => <TeacherHomepageAbout {...Routprops} />}/>
+              {/* <Route path = {'/TeacherPage/:roll/TeacherMarksUpload'} exact render = { (Routprops) => <Hey {...Routprops} />}/> */}
+            <Switch>
              
-          </Aux>
+             <Route path = {'/TeacherPage/:roll/TeacherMessageBox'}  render = { (Routprops) => <TeacherMessageBox {...Routprops} />}/>             
+             <Route path = {'/TeacherPage/:roll/TeacherMarksUpload'}  render = { (Routprops) => <TeacherMarksUplaod {...Routprops} TeachergetStudentsListForMarks = {this.TeachergetStudentsListForMarks}  InputTeacherClassroom = {this.state.TeacherClassroom} handleChange = {this.OnChangeClassroomMarksHandler} handleTeacherData = {this.OnChangeClassroomHandler} classroomMarksTableState ={this.state.classroomMarksTableState} UpdateClassroomTable = {this.UpdateClassroomTable}/>}/>
+             <Route path = {'/TeacherPage/:roll/TeacherAttendanceUpload'}  render = { (Routprops) => <TeacherAttendanceUpload {...Routprops} TeachergetStudentsListForAttendance = {this.TeachergetStudentsListForAttendance}  InputTeacherClassroom ={this.state.TeacherClassroom} handleChange = {this.OnChangeClassroomAttendanceHandler} handleTeacherData = {this.OnChangeClassroomHandler} classroomAttendanceTableState ={this.state.classroomAttendanceTableState} UpdateClassroomTable = {this.UpdateClassroomTableAboutAttendance}/>}/>
+             </Switch>
+          
+             <Route path = {'/StudentPage/:roll'} exact render = { (Routprops) => <StudentHomepageAbout {...Routprops} StudentMarks = {this.StudentMarks} StudentAttendance = {this.StudentAttendance}/>}/>
+             <Switch>
+             <Route path = {'/StudentPage/:roll/StudentMarks'} exact render = { (Routprops) => <StudentMarks {...Routprops} getStudentMarks = {this.getStudentMarks}/>}/>
+             <Route path = {'/StudentPage/:roll/StudentAttendance'} exact render = { (Routprops) => <StudentAttendance {...Routprops} />}/>
+             <Route path = {'/StudentPage/:roll/StudentMessageBox'} render = { (Routprops) => <StudentMessageBox {...Routprops} />}/>
+            </Switch>
+          </main>
+        </Aux>
 
           
        )
@@ -425,4 +292,4 @@ const mapDispatchToProps = dispatch => {
          };
 };
 
-export default connect(mapStateToProps,mapDispatchToProps)(ErpBuilder);
+export default  connect(mapStateToProps,mapDispatchToProps)(ErpBuilder);
