@@ -1,26 +1,26 @@
 import React from 'react'
 import {Link}from 'react-router-dom'
+import {Input,Label,Form,Checkbox,Button} from 'semantic-ui-react'
 const StudentLogin = (props) => {
-
-   
     return (
-         <div>
-           <br/>
-         <strong>Student Login</strong>
-         <br/>
-         <label htmlFor = 'Studentrollno'>RollNo</label>
-         <input id = 'Studentrollno' type ='text' name = 'rollno' value = {props.state.roll} onChange = {props.handleRollNo} ></input>
-         <br/>
-         <label htmlFor = 'Studentpassword'>Password</label>
-         <input id = 'Studentpassword' type ='password' name = 'password' value = {props.state.password} onChange = {props.handlePassword}></input>
-         <br/>
-            <Link onClick = {props.LoginSubmit}  to={'/StudentPage/' + props.state.roll} >Submit</Link>
-         </div>
-         
-        
-         
-       
+            
+              <Form>
+                <Form.Field>
+                  <Label as ='a' color = 'black' size = 'large' ribbon htmlFor = 'Studentrollno'>RollNo</Label>
+                  <Input fluid style = {{width : "200px"}} placeholder = 'be1000115' id = 'Studentrollno' type ='text' name = 'rollno' value = {props.InputStudent.roll} onChange = {props.handleRollNo} ></Input>
+                </Form.Field>
+                <Form.Field>
+                  <Label as ='a' color = 'black' size = 'large' ribbon htmlFor = 'Studentpassword'>Password</Label>
+                  <Input fluid style = {{width : "300px"}} placeholder = 'Password' id = 'Studentpassword' type ='password' name = 'password' value = {props.InputStudent.password} onChange = {props.handlePassword}></Input>
+                </Form.Field>
+                <Form.Field>
+                  <Checkbox label='I agree to the Terms and Conditions' />
+                </Form.Field>
+                <Button as = {Link} onClick = {props.LoginSubmit} to = {'/StudentPage/' + props.InputStudent.roll}>Submit</Button>
+              </Form>
     )
 }
+
+
 
 export default StudentLogin
